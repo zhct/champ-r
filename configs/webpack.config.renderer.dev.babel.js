@@ -59,7 +59,7 @@ export default merge.smart(baseConfig, {
     ...(process.env.PLAIN_HMR ? [] : ['react-hot-loader/patch']),
     `webpack-dev-server/client?http://localhost:${port}/`,
     'webpack/hot/only-dev-server',
-    require.resolve('../app/index')
+    require.resolve('../src/index')
   ],
 
   output: {
@@ -219,7 +219,8 @@ export default merge.smart(baseConfig, {
   },
   resolve: {
     alias: {
-      'react-dom': '@hot-loader/react-dom'
+      'react-dom': '@hot-loader/react-dom',
+      src: path.join(__dirname, '../src')
     }
   },
   plugins: [

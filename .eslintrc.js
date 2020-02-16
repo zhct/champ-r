@@ -1,20 +1,28 @@
+const path = require('path');
+
 module.exports = {
   extends: [
     require.resolve('eslint-config-airbnb'),
     'plugin:prettier/recommended',
     require.resolve('eslint-config-prettier/react')
   ],
+
   plugins: ['import', 'promise', 'compat', 'react'],
+
   parser: require.resolve('babel-eslint'),
+
   parserOptions: {
     sourceType: 'module',
     allowImportExportEverywhere: true
   },
+
   env: {
     browser: true,
     node: true
   },
+
   rules: {
+    'import/order': 'off',
     'arrow-parens': 'off',
     'compat/compat': 'error',
     'consistent-return': 'off',
@@ -47,5 +55,19 @@ module.exports = {
     'react/jsx-no-bind': 'off',
     'react/jsx-filename-extension': ['error', { extensions: ['.js', '.jsx'] }],
     'react/prefer-stateless-function': 'off'
+  },
+
+  settings: {
+    'import/resolver': {
+      webpack: {
+        config: {
+          resolve: {
+            alias: {
+              src: path.resolve('./src'),
+            }
+          }
+        }
+      }
+    }
   }
 };
