@@ -14,6 +14,12 @@ import CheckNodeEnv from '../internals/scripts/CheckNodeEnv';
 
 CheckNodeEnv('production');
 
+// style files regexes
+const cssRegex = /\.css$/;
+const cssModuleRegex = /\.module\.css$/;
+const sassRegex = /\.(scss|sass)$/;
+const sassModuleRegex = /\.module\.(scss|sass)$/;
+
 export default merge.smart(baseConfig, {
   devtool: 'source-map',
 
@@ -33,25 +39,7 @@ export default merge.smart(baseConfig, {
     rules: [
       // Extract all .global.css to style.css as is
       {
-        test: /\.global\.css$/,
-        use: [
-          {
-            loader: MiniCssExtractPlugin.loader,
-            options: {
-              publicPath: './'
-            }
-          },
-          {
-            loader: 'css-loader',
-            options: {
-              sourceMap: true
-            }
-          }
-        ]
-      },
-      // Pipe other styles through css modules and append to style.css
-      {
-        test: /^((?!\.global).)*\.css$/,
+        test: cssModuleRegex,
         use: [
           {
             loader: MiniCssExtractPlugin.loader
@@ -67,31 +55,32 @@ export default merge.smart(baseConfig, {
           }
         ]
       },
-      // Add SASS support  - compile all .global.scss files and pipe it to style.css
+      // Pipe other styles through css modules and append to style.css
       {
-        test: /\.global\.(scss|sass)$/,
+        test: cssRegex,
+        exclude: cssModuleRegex,
         use: [
           {
-            loader: MiniCssExtractPlugin.loader
+            loader: MiniCssExtractPlugin.loader,
+            options: {
+              publicPath: './'
+            }
           },
           {
             loader: 'css-loader',
             options: {
-              sourceMap: true,
-              importLoaders: 1
-            }
-          },
-          {
-            loader: 'sass-loader',
-            options: {
               sourceMap: true
             }
           }
-        ]
+        ],
+        // Don't consider CSS imports dead code even if the
+        // containing package claims to have no side effects.
+        // Remove this when webpack adds a warning or an error for this.
+        // See https://github.com/webpack/webpack/issues/6571
+        sideEffects: true
       },
-      // Add SASS support  - compile all other .scss files and pipe it to style.css
       {
-        test: /^((?!\.global).)*\.(scss|sass)$/,
+        test: sassModuleRegex,
         use: [
           {
             loader: MiniCssExtractPlugin.loader
@@ -113,6 +102,33 @@ export default merge.smart(baseConfig, {
             }
           }
         ]
+      },
+      {
+        test: sassRegex,
+        exclude: sassModuleRegex,
+        use: [
+          {
+            loader: MiniCssExtractPlugin.loader
+          },
+          {
+            loader: 'css-loader',
+            options: {
+              sourceMap: true,
+              importLoaders: 1
+            }
+          },
+          {
+            loader: 'sass-loader',
+            options: {
+              sourceMap: true
+            }
+          }
+        ],
+        // Don't consider CSS imports dead code even if the
+        // containing package claims to have no side effects.
+        // Remove this when webpack adds a warning or an error for this.
+        // See https://github.com/webpack/webpack/issues/6571
+        sideEffects: true
       },
       // WOFF Font
       {

@@ -1,4 +1,4 @@
-import './app.global.css';
+import './app.css';
 
 import React, { Fragment } from 'react';
 import { render } from 'react-dom';

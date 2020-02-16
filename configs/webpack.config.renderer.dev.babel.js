@@ -30,6 +30,12 @@ const requiredByDLLConfig = module.parent.filename.includes(
   'webpack.config.renderer.dev.dll'
 );
 
+// style files regexes
+const cssRegex = /\.css$/;
+const cssModuleRegex = /\.module\.css$/;
+const sassRegex = /\.(scss|sass)$/;
+const sassModuleRegex = /\.module\.(scss|sass)$/;
+
 /**
  * Warn if the DLL is not built
  */
@@ -74,21 +80,7 @@ export default merge.smart(baseConfig, {
         }
       },
       {
-        test: /\.global\.css$/,
-        use: [
-          {
-            loader: 'style-loader'
-          },
-          {
-            loader: 'css-loader',
-            options: {
-              sourceMap: true
-            }
-          }
-        ]
-      },
-      {
-        test: /^((?!\.global).)*\.css$/,
+        test: cssModuleRegex,
         use: [
           {
             loader: 'style-loader'
@@ -105,9 +97,9 @@ export default merge.smart(baseConfig, {
           }
         ]
       },
-      // SASS support - compile all .global.scss files and pipe it to style.css
       {
-        test: /\.global\.(scss|sass)$/,
+        test: cssRegex,
+        exclude: cssModuleRegex,
         use: [
           {
             loader: 'style-loader'
@@ -117,15 +109,16 @@ export default merge.smart(baseConfig, {
             options: {
               sourceMap: true
             }
-          },
-          {
-            loader: 'sass-loader'
           }
-        ]
+        ],
+        // Don't consider CSS imports dead code even if the
+        // containing package claims to have no side effects.
+        // Remove this when webpack adds a warning or an error for this.
+        // See https://github.com/webpack/webpack/issues/6571
+        sideEffects: true
       },
-      // SASS support - compile all other .scss files and pipe it to style.css
       {
-        test: /^((?!\.global).)*\.(scss|sass)$/,
+        test: sassModuleRegex,
         use: [
           {
             loader: 'style-loader'
@@ -144,6 +137,29 @@ export default merge.smart(baseConfig, {
             loader: 'sass-loader'
           }
         ]
+      },
+      {
+        test: sassRegex,
+        exclude: sassModuleRegex,
+        use: [
+          {
+            loader: 'style-loader'
+          },
+          {
+            loader: 'css-loader',
+            options: {
+              sourceMap: true
+            }
+          },
+          {
+            loader: 'sass-loader'
+          }
+        ],
+        // Don't consider CSS imports dead code even if the
+        // containing package claims to have no side effects.
+        // Remove this when webpack adds a warning or an error for this.
+        // See https://github.com/webpack/webpack/issues/6571
+        sideEffects: true
       },
       // WOFF Font
       {
